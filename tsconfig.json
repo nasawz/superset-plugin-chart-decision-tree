@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors":true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "lib",
@@ -29,9 +33,10 @@
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
     "types": ["jest"],
-    "typeRoots": [
-      "./node_modules/@types"
-    ]
+    "baseUrl": ".", // Here... try with correct values and the issue should get fixed
+    "paths": {
+      "*": ["src/*"] // Here... try with correct values and the issue should get fixed
+    }
   },
   "exclude": [
     "lib",

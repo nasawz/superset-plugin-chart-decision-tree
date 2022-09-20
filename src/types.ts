@@ -21,12 +21,9 @@ import { QueryFormData, supersetTheme, TimeseriesDataRecord } from '@superset-ui
 export interface SupersetPluginChartHelloWorldStylesProps {
   height: number;
   width: number;
-  headerFontSize: keyof typeof supersetTheme.typography.sizes;
-  boldText: boolean;
 }
 
 interface SupersetPluginChartHelloWorldCustomizeProps {
-  headerText: string;
 }
 
 export type SupersetPluginChartHelloWorldQueryFormData = QueryFormData &
@@ -35,6 +32,6 @@ export type SupersetPluginChartHelloWorldQueryFormData = QueryFormData &
 
 export type SupersetPluginChartHelloWorldProps = SupersetPluginChartHelloWorldStylesProps &
   SupersetPluginChartHelloWorldCustomizeProps & {
-    data: TimeseriesDataRecord[];
+    data: any;
     // add typing here for the props you pass in from transformProps.ts!
   };

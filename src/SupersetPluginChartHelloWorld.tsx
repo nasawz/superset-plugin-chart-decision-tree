@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, createRef } from 'react';
+import React, { useEffect, createRef, useRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import { SupersetPluginChartHelloWorldProps, SupersetPluginChartHelloWorldStylesProps } from './types';
 
@@ -28,27 +28,95 @@ import { SupersetPluginChartHelloWorldProps, SupersetPluginChartHelloWorldStyles
 // https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
 const Styles = styled.div<SupersetPluginChartHelloWorldStylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
   padding: ${({ theme }) => theme.gridUnit * 4}px;
-  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
-
-  h3 {
-    /* You can use your props to control CSS! */
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) => theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) => theme.typography.weights[boldText ? 'bold' : 'normal']};
-  }
-
-  pre {
-    height: ${({ theme, headerFontSize, height }) => (
-      height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]
-    )}px;
-  }
 `;
 
+import G6 from '@antv/g6';
+
+import registerShape from "./cost_tree/shape";
+registerShape(G6);
+const mockData = {
+  id: "g1",
+  name: "总成本",
+  count: 18134,
+  children: [
+    {
+      id: "g11",
+      name: "直接成本",
+      count: 12442,
+      children: [
+        {
+          id: "g111",
+          name: "人员成本",
+          count: 8442,
+          children: [
+            {
+              id: "g1111",
+              name: "工资",
+              count: 5442,
+            },
+            {
+              id: "g1112",
+              name: "奖金",
+              count: 442,
+            },
+            {
+              id: "g1113",
+              name: "补贴",
+              count: 105,
+            },
+          ],
+        },
+        {
+          id: "g112",
+          name: "材料成本",
+          count: 2442,
+        },
+        {
+          id: "g113",
+          name: "固定资产折旧",
+          count: 0,
+        },
+        {
+          id: "g114",
+          name: "其他成本",
+          count: 1402,
+        },
+      ],
+    },
+    {
+      id: "g12",
+      name: "间接成本",
+      count: 5150,
+      children: [
+        {
+          id: "g121",
+          name: "科室直接成本分摊",
+          count: 5150,
+          children: [
+            {
+              id: "g1211",
+              name: "人员成本",
+              count: 5150,
+            },
+            {
+              id: "g1212",
+              name: "其他成本",
+              count: 5150,
+            },
+          ],
+        },
+        {
+          id: "g122",
+          name: "科室间接成本分摊",
+          count: 0,
+        },
+      ],
+    },
+  ],
+};
 /**
  * ******************* WHAT YOU CAN BUILD HERE *******************
  *  In essence, a chart is given a few key ingredients to work with:
@@ -61,28 +129,175 @@ export default function SupersetPluginChartHelloWorld(props: SupersetPluginChart
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width } = props;
+  console.log('----------------------', data);
 
   const rootElem = createRef<HTMLDivElement>();
-
+  const [sgraph,setSGraph] : any=useState(null)
   // Often, you just want to get a hold of the DOM and go nuts.
   // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
-    const root = rootElem.current as HTMLElement;
-    console.log('Plugin element', root);
-  });
+    console.log('--------------init graph');
+    
+    const container = rootElem.current as HTMLElement;
+    console.log('Plugin element', container);
 
+    const defaultConfig = {
+      width,
+      height,
+      modes: {
+        default: ["zoom-canvas", "drag-canvas"],
+      },
+      // fitView: true,
+      // fitViewPadding:[ 0, 0, 0, 0],
+      // fitCenter:false,
+      animate: true,
+      defaultNode: {
+        type: "flow-rect",
+      },
+      defaultEdge: {
+        type: "cubic-horizontal",
+        style: {
+          stroke: "#CED4D9",
+        },
+      },
+      layout: {
+        type: "indented",
+        direction: "LR",
+        dropCap: false,
+        indent: 300,
+        getHeight: () => {
+          return 60;
+        },
+      }
+    };
+
+   const graph = new G6.TreeGraph({
+      container: container,
+      ...defaultConfig,
+      // plugins: [tooltip],
+    });
+    graph.data(data);
+    graph.render();
+    graph.translate(110, 60);
+
+    const handleCollapse = (e) => {
+      const target = e.target;
+      const id = target.get("modelId");
+      const item = graph.findById(id);
+      const nodeModel = item.getModel();
+      nodeModel.collapsed = !nodeModel.collapsed;
+      graph.layout();
+      graph.setItemState(item, "collapse", nodeModel.collapsed == true);
+    };
+
+    graph.on("collapse-text:click", (e) => {
+      handleCollapse(e);
+    });
+    graph.on("collapse-back:click", (e) => {
+      handleCollapse(e);
+    });
+
+    // 监听画布缩放，缩小到一定程度，节点显示缩略样式
+    let currentLevel = 1;
+    const briefZoomThreshold = Math.max(graph.getZoom(), 0.5);
+    graph.on("viewportchange", (e) => {
+      if (e.action !== "zoom") return;
+      const currentZoom = graph.getZoom();
+      let toLevel = currentLevel;
+      if (currentZoom < briefZoomThreshold) {
+        toLevel = 0;
+      } else {
+        toLevel = 1;
+      }
+      if (toLevel !== currentLevel) {
+        currentLevel = toLevel;
+        graph.getNodes().forEach((node) => {
+          graph.updateItem(node, {
+            level: toLevel,
+          });
+        });
+      }
+    });
+    setSGraph(graph)
+    // const width = container.scrollWidth;
+    // const height = container.scrollHeight || 500;
+    //   const graph = new G6.Graph({
+    //     container: container,
+    //     width,
+    //     height,
+    //     layout: {
+    //       type: 'force',
+    //     },
+    //     defaultNode: {
+    //       size: 15,
+    //     },
+    //   });    
+    //   fetch('https://gw.alipayobjects.com/os/antvdemo/assets/data/relations.json')
+    // .then((res) => res.json())
+    // .then((data) => {
+    //   graph.data({
+    //     nodes: data.nodes,
+    //     edges: data.edges.map(function (edge:any, i:any) {
+    //       edge.id = 'edge' + i;
+    //       return Object.assign({}, edge);
+    //     }),
+    //   });
+    //   graph.render();
+
+    //   graph.on('node:dragstart', function (e) {
+    //     graph.layout();
+    //     refreshDragedNodePosition(e);
+    //   });
+    //   graph.on('node:drag', function (e) {
+    //     const forceLayout = graph.get('layoutController').layoutMethods[0];
+    //     forceLayout.execute();
+    //     refreshDragedNodePosition(e);
+    //   });
+    //   graph.on('node:dragend', function (e) {
+    //     if(e){
+    //       e!.item!.get('model').fx = null;
+    //       e!.item!.get('model').fy = null;
+    //     }
+
+    //   });
+
+    //   if (typeof window !== 'undefined')
+    //     window.onresize = () => {
+    //       if (!graph || graph.get('destroyed')) return;
+    //       if (!container || !container.scrollWidth || !container.scrollHeight) return;
+    //       graph.changeSize(container.scrollWidth, container.scrollHeight);
+    //     };
+    // });
+  }, []);
+
+  useEffect(() => {
+    console.log('data change ',data,sgraph);
+    
+    if (sgraph != null) {
+
+      sgraph!.changeData(data);
+      sgraph.translate(110, 60);
+      // sgraph.render();
+      sgraph!.refresh();
+
+    }
+  }, [data])
+
+  // function refreshDragedNodePosition(e) {
+  //   const model = e.item.get('model');
+  //   model.fx = e.x;
+  //   model.fy = e.y;
+  // }
   console.log('Plugin props', props);
 
   return (
     <Styles
       ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
       height={height}
       width={width}
     >
-      <h3>{props.headerText}</h3>
-      <pre>${JSON.stringify(data, null, 2)}</pre>
+      {/* <h3>{props.headerText}</h3>
+      <pre>${JSON.stringify(data, null, 2)}</pre> */}
     </Styles>
   );
 }

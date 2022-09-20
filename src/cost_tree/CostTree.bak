@@ -1,0 +1,275 @@
+<template>
+  <div>
+    <span class="card-header-title">{{ title }}</span>
+    <div
+      ref="canvas"
+      class="canvasPanel"
+      :style="{ height: height + 'px', width: '100%' }"
+    ></div>
+  </div>
+</template>
+
+<script>
+import G6 from "@antv/g6";
+import registerShape from "./shape";
+registerShape(G6);
+const mockData = {
+  id: "g1",
+  name: "总成本",
+  count: 18134,
+  children: [
+    {
+      id: "g11",
+      name: "直接成本",
+      count: 12442,
+      children: [
+        {
+          id: "g111",
+          name: "人员成本",
+          count: 8442,
+          children: [
+            {
+              id: "g1111",
+              name: "工资",
+              count: 5442,
+            },
+            {
+              id: "g1112",
+              name: "奖金",
+              count: 442,
+            },
+            {
+              id: "g1113",
+              name: "补贴",
+              count: 105,
+            },
+          ],
+        },
+        {
+          id: "g112",
+          name: "材料成本",
+          count: 2442,
+        },
+        {
+          id: "g113",
+          name: "固定资产折旧",
+          count: 0,
+        },
+        {
+          id: "g114",
+          name: "其他成本",
+          count: 1402,
+        },
+      ],
+    },
+    {
+      id: "g12",
+      name: "间接成本",
+      count: 5150,
+      children: [
+        {
+          id: "g121",
+          name: "科室直接成本分摊",
+          count: 5150,
+          children: [
+            {
+              id: "g1211",
+              name: "人员成本",
+              count: 5150,
+            },
+            {
+              id: "g1212",
+              name: "其他成本",
+              count: 5150,
+            },
+          ],
+        },
+        {
+          id: "g122",
+          name: "科室间接成本分摊",
+          count: 0,
+        },
+      ],
+    },
+  ],
+};
+export default {
+  name: "node-flow",
+  props: {
+    height: {
+      type: Number,
+      default: 500,
+    },
+    data: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
+    title: {
+      type: String,
+      default: "成本明细",
+    },
+  },
+  data() {
+    return {
+      graph: null,
+    };
+  },
+  mounted() {
+    // this.initGraph();
+  },
+  watch: {
+    data(newData, oldData) {
+      if (newData !== oldData) {
+        this.data = this.dealData(newData);
+        this.initGraph();
+      }
+    },
+  },
+  methods: {
+    dealData(data) {
+      if (data) {
+        data.count = data.fee;
+        if (data.children) {
+          data.children.map((item) => {
+            this.dealData(item);
+          });
+        }
+      }
+      return data;
+    },
+    initGraph() {
+      // if (!data) {
+      //   return;
+      // }
+      // const { onInit, config } = props;
+      const tooltip = new G6.Tooltip({
+        // offsetX and offsetY include the padding of the parent container
+        offsetX: 20,
+        offsetY: 30,
+        // the types of items that allow the tooltip show up
+        // 允许出现 tooltip 的 item 类型
+        itemTypes: ["node"],
+        // custom the tooltip's content
+        // 自定义 tooltip 内容
+        getContent: (e) => {
+          const outDiv = document.createElement("div");
+          //outDiv.style.padding = '0px 0px 20px 0px';
+          const nodeName = e.item.getModel().name;
+          let formatedNodeName = "";
+          for (let i = 0; i < nodeName.length; i++) {
+            formatedNodeName = `${formatedNodeName}${nodeName[i]}`;
+            if (i !== 0 && i % 20 === 0)
+              formatedNodeName = `${formatedNodeName}<br/>`;
+          }
+          outDiv.innerHTML = `${formatedNodeName}`;
+          return outDiv;
+        },
+        shouldBegin: (e) => {
+          if (
+            e.target.get("name") === "name-shape" ||
+            e.target.get("name") === "mask-label-shape"
+          )
+            return true;
+          return false;
+        },
+      });
+      const width = this.$refs["canvas"].offsetWidth;
+      const defaultConfig = {
+        width,
+        height: this.height,
+        modes: {
+          default: ["zoom-canvas", "drag-canvas"],
+        },
+        // fitView: true,
+        // fitViewPadding:[ 0, 0, 0, 0],
+        // fitCenter:false,
+        animate: true,
+        defaultNode: {
+          type: "flow-rect",
+        },
+        defaultEdge: {
+          type: "cubic-horizontal",
+          style: {
+            stroke: "#CED4D9",
+          },
+        },
+        layout: {
+          type: "indented",
+          direction: "LR",
+          dropCap: false,
+          indent: 300,
+          getHeight: () => {
+            return 60;
+          },
+        },
+        // padding: [100, 100],
+        // defaultLevel: 3,
+        // defaultZoom: 0.8,
+        modes: { default: ["zoom-canvas", "drag-canvas"] },
+      };
+      this.graph = new G6.TreeGraph({
+        container: this.$refs["canvas"],
+        ...defaultConfig,
+        // plugins: [tooltip],
+      });
+      this.graph.data(this.data);
+      this.graph.render();
+      this.graph.translate(110, 60);
+      const handleCollapse = (e) => {
+        const target = e.target;
+        const id = target.get("modelId");
+        const item = this.graph.findById(id);
+        const nodeModel = item.getModel();
+        nodeModel.collapsed = !nodeModel.collapsed;
+        this.graph.layout();
+        this.graph.setItemState(item, "collapse", nodeModel.collapsed);
+      };
+      this.graph.on("collapse-text:click", (e) => {
+        handleCollapse(e);
+      });
+      this.graph.on("collapse-back:click", (e) => {
+        handleCollapse(e);
+      });
+      // 监听画布缩放，缩小到一定程度，节点显示缩略样式
+      let currentLevel = 1;
+      const briefZoomThreshold = Math.max(this.graph.getZoom(), 0.5);
+      this.graph.on("viewportchange", (e) => {
+        if (e.action !== "zoom") return;
+        const currentZoom = this.graph.getZoom();
+        let toLevel = currentLevel;
+        if (currentZoom < briefZoomThreshold) {
+          toLevel = 0;
+        } else {
+          toLevel = 1;
+        }
+        if (toLevel !== currentLevel) {
+          currentLevel = toLevel;
+          this.graph.getNodes().forEach((node) => {
+            this.graph.updateItem(node, {
+              level: toLevel,
+            });
+          });
+        }
+      });
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.card-header-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.g6-component-tooltip {
+  background-color: rgba(0, 0, 0, 0.65);
+  padding: 10px;
+  box-shadow: rgb(174, 174, 174) 0px 0px 10px;
+  width: fit-content;
+  color: #fff;
+  border-radius: 4px;
+}
+</style>

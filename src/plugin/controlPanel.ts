@@ -16,8 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, validateNonEmpty } from '@superset-ui/core';
+import { t, validateNonEmpty,FeatureFlag,isFeatureEnabled } from '@superset-ui/core';
 import { ControlPanelConfig, sections, sharedControls } from '@superset-ui/chart-controls';
+
+const requiredEntity = {
+  ...sharedControls.entity,
+  clearable: false,
+};
+const optionalEntity = {
+  ...sharedControls.entity,
+  clearable: true,
+  validators: [],
+};
 
 const config: ControlPanelConfig = {
   /**
@@ -103,32 +113,63 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         [
           {
-            name: 'cols',
+            name: 'id',
             config: {
-              ...sharedControls.groupby,
-              label: t('Columns'),
-              description: t('Columns to group by'),
+              ...requiredEntity,
+              label: t('Id'),
+              description: t('Name of the id column'),
             },
           },
         ],
         [
           {
-            name: 'metrics',
+            name: 'parent',
             config: {
-              ...sharedControls.metrics,
-              // it's possible to add validators to controls if
-              // certain selections/types need to be enforced
-              validators: [validateNonEmpty],
+              ...requiredEntity,
+              label: t('Parent'),
+              description: t(
+                'Name of the column containing the id of the parent node',
+              ),
+            },
+          },
+        ],
+        [
+          {
+            name: 'name',
+            config: {
+              ...optionalEntity,
+              label: t('Name'),
+              description: t('Optional name of the data column.'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'root_node_id',
+            config: {
+              ...optionalEntity,
+              renderTrigger: true,
+              type: 'TextControl',
+              label: t('Root node id'),
+              description: t('Id of root node of the tree.'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'metric',
+            config: {
+              ...optionalEntity,
+              type: isFeatureEnabled(FeatureFlag.ENABLE_EXPLORE_DRAG_AND_DROP)
+                ? 'DndMetricSelect'
+                : 'MetricsControl',
+              label: t('Metric'),
+              description: t('Metric for node values'),
             },
           },
         ],
         ['adhoc_filters'],
-        [
-          {
-            name: 'row_limit',
-            config: sharedControls.row_limit,
-          },
-        ],
+        ['row_limit'],
       ],
     },
     {
