@@ -136,7 +136,6 @@ export default function SupersetPluginChartHelloWorld(props: SupersetPluginChart
   // Often, you just want to get a hold of the DOM and go nuts.
   // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
-    console.log('--------------init graph');
     
     const container = rootElem.current as HTMLElement;
     console.log('Plugin element', container);
