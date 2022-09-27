@@ -35,7 +35,7 @@ import { SupersetPluginChartDecisionTree } from 'superset-plugin-chart-decision-
 
 to import the plugin and later add the following to the array that's passed to the `plugins` property:
 ```js
-new SupersetPluginChartDecisionTree().configure({ key: 'chart-decision-tree' }),
+new SupersetPluginChartDecisionTree().configure({ key: 'chart_decision_tree' }),
 ```
 
 After that the plugin should show up when you run Superset, e.g. the development server:
@@ -45,9 +45,12 @@ npm run dev-server
 ```
 
 
+## 参考资料
+
+"superset-plugin-chart-decision-tree": "file:../../superset-plugin-chart-decision-tree",
 
 
-
+```
 http://localhost:9000/superset/dashboard/3/?preselect_filters={"27": {"equip_id": "4"},"28": {"equip_id": "4"}}
 
 http://localhost:9000/superset/dashboard/3/?standalone=3&show_filters=0
@@ -55,3 +58,4 @@ http://localhost:9000/superset/dashboard/3/?standalone=3&show_filters=0
 http://localhost:9000/superset/dashboard/3/?standalone=2&show_filters=0
 
 http://localhost:9000/superset/dashboard/5/?expand_filters=0&standalone=3&show_filters=0&native_filters_key=BJUtmiCZCyEe7HjXy_xUH6eyoNwL9iiS0EZSPk7ESSyKt26TgJA-11BriyvOINZv
+```
