@@ -33,8 +33,8 @@ export default class SupersetPluginChartHelloWorld extends ChartPlugin {
    */
   constructor() {
     const metadata = new ChartMetadata({
-      description: 'Superset Plugin Chart Hello World',
-      name: t('Hello World'),
+      description: '决策树是在已知各种情况的基础上，通过事项构建树状图，根据自己的上下级进行关联，挂接到对应的分支，常用于项目风险评估，可行性的决策分析等场景，是直观运用概率分析的一种图解法。支持展开、收起、悬停、点击等交互。支持根据当前缩放等级，节点切换详情模式与缩略模式。',
+      name: t('决策树'),
       thumbnail,
       // useLegacyApi: true,
     });

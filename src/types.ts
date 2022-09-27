@@ -18,21 +18,21 @@
  */
 import { Datasource, QueryFormData, supersetTheme, TimeseriesDataRecord } from '@superset-ui/core';
 
-export interface SupersetPluginChartHelloWorldStylesProps {
+export interface SupersetPluginChartDecisionTreeStylesProps {
   height: number;
   width: number;
 }
 
-interface SupersetPluginChartHelloWorldCustomizeProps {
+interface SupersetPluginChartDecisionTreeCustomizeProps {
   onChange
 }
 
-export type SupersetPluginChartHelloWorldQueryFormData = QueryFormData &
-  SupersetPluginChartHelloWorldStylesProps &
-  SupersetPluginChartHelloWorldCustomizeProps;
+export type SupersetPluginChartDecisionTreeQueryFormData = QueryFormData &
+  SupersetPluginChartDecisionTreeStylesProps &
+  SupersetPluginChartDecisionTreeCustomizeProps;
 
-export type SupersetPluginChartHelloWorldProps = SupersetPluginChartHelloWorldStylesProps &
-  SupersetPluginChartHelloWorldCustomizeProps & {
+export type SupersetPluginChartDecisionTreeProps = SupersetPluginChartDecisionTreeStylesProps &
+  SupersetPluginChartDecisionTreeCustomizeProps & {
     datasource?: Datasource;
     data: any;
     // add typing here for the props you pass in from transformProps.ts!
