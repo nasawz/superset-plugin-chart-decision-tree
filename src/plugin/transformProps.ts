@@ -22,7 +22,7 @@ import {
   getMetricLabel,
   TimeseriesDataRecord,
 } from "@superset-ui/core";
-
+const NOOP = () => {};
 export default function transformProps(chartProps: ChartProps) {
   /**
    * This function is called after a successful response has been
@@ -53,7 +53,15 @@ export default function transformProps(chartProps: ChartProps) {
    * function during development with hot reloading, changes won't
    * be seen until restarting the development server.
    */
-  const { width, height, formData, queriesData } = chartProps;
+  const { width, height, formData, queriesData, hooks ,
+    datasource,
+    initialValues,
+    rawDatasource = {},
+    rawFormData,
+  } = chartProps;
+
+  const { onAddFilter = NOOP } = hooks;
+
   const data = queriesData[0].data || [];
   const { id, parent, name, metric = "", rootNodeId } = formData;
 
@@ -150,16 +158,17 @@ export default function transformProps(chartProps: ChartProps) {
   if (rootNodeId) {
     finalTree = createTree(rootNodeId);
   } else {
-    let _rootNodeId = '';
+    let _rootNodeId = "";
     data.forEach((node) => {
       if (node[parent] == null) {
         _rootNodeId = `${node[id]}`;
         return;
       }
     });
-console.log('_rootNodeId',_rootNodeId);
+    console.log("_rootNodeId", _rootNodeId);
 
     finalTree = createTree(_rootNodeId);
+console.log('finalTree',finalTree);
 
     /*
       to select root node,
@@ -193,12 +202,16 @@ console.log('_rootNodeId',_rootNodeId);
   }
 
   return {
+    datasource: rawDatasource,
+    filtersChoices: queriesData[0].data,
     width,
     height,
     data: finalTree,
+    onChange: onAddFilter,
     // and now your control data, manipulated as needed, and passed through as props!
     // boldText,
     // headerFontSize,
     // headerText,
+    rawFormData,
   };
 }

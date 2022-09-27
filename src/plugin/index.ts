@@ -29,15 +29,14 @@ export default class SupersetPluginChartHelloWorld extends ChartPlugin {
    * and application. A more thorough description of each property is given in
    * the respective imported file.
    *
-   * It is worth noting that `buildQuery` and is optional, and only needed for
-   * advanced visualizations that require either post processing operations
-   * (pivoting, rolling aggregations, sorting etc) or submitting multiple queries.
+   * It is worth noting that `buildQuery` and is optional, and only needed for advanced visualizations that require either post processing operations (pivoting, rolling aggregations, sorting etc) or submitting multiple queries.
    */
   constructor() {
     const metadata = new ChartMetadata({
       description: 'Superset Plugin Chart Hello World',
       name: t('Hello World'),
       thumbnail,
+      // useLegacyApi: true,
     });
 
     super({

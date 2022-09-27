@@ -113,6 +113,19 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         [
           {
+            name: 'filter_configs',
+            config: {
+              type: 'CollectionControl',
+              label: 'Filters',
+              description: t('Filter configuration for the filter box'),
+              validators: [],
+              controlName: 'FilterBoxItemControl',
+              mapStateToProps: ({ datasource }) => ({ datasource }),
+            },
+          },
+        ],
+        [
+          {
             name: 'id',
             config: {
               ...requiredEntity,

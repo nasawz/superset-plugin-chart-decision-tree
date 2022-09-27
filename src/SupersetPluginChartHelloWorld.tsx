@@ -18,6 +18,7 @@
  */
 import React, { useEffect, createRef, useRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
+// import { Button } from '@superset-ui/core';
 import { SupersetPluginChartHelloWorldProps, SupersetPluginChartHelloWorldStylesProps } from './types';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
@@ -128,17 +129,18 @@ const mockData = {
 export default function SupersetPluginChartHelloWorld(props: SupersetPluginChartHelloWorldProps) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
-  const { data, height, width } = props;
-  console.log('----------------------', data);
+  const { data, height, width, onChange } = props;
+  // console.log('----------------------', data, onChange);
+  // this.props.onChange(selectedValues, false);
 
   const rootElem = createRef<HTMLDivElement>();
-  const [sgraph,setSGraph] : any=useState(null)
+  const [sgraph, setSGraph]: any = useState(null)
   // Often, you just want to get a hold of the DOM and go nuts.
   // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
-    
+
     const container = rootElem.current as HTMLElement;
-    console.log('Plugin element', container);
+    // console.log('Plugin element', container);
 
     const defaultConfig = {
       width,
@@ -170,7 +172,7 @@ export default function SupersetPluginChartHelloWorld(props: SupersetPluginChart
       }
     };
 
-   const graph = new G6.TreeGraph({
+    const graph = new G6.TreeGraph({
       container: container,
       ...defaultConfig,
       // plugins: [tooltip],
@@ -270,8 +272,8 @@ export default function SupersetPluginChartHelloWorld(props: SupersetPluginChart
   }, []);
 
   useEffect(() => {
-    console.log('data change ',data,sgraph);
-    
+    // console.log('data change ', data, sgraph);
+
     if (sgraph != null) {
 
       sgraph!.changeData(data);
@@ -287,7 +289,12 @@ export default function SupersetPluginChartHelloWorld(props: SupersetPluginChart
   //   model.fx = e.x;
   //   model.fy = e.y;
   // }
-  console.log('Plugin props', props);
+  // console.log('Plugin props', props);
+  // const clickApply = () => {
+  //   console.log('-----------------', onChange);
+  //   var selectedValues = { "equip_id": [3] };
+  //   onChange(selectedValues, true)
+  // }
 
   return (
     <Styles
@@ -295,8 +302,30 @@ export default function SupersetPluginChartHelloWorld(props: SupersetPluginChart
       height={height}
       width={width}
     >
-      {/* <h3>{props.headerText}</h3>
-      <pre>${JSON.stringify(data, null, 2)}</pre> */}
     </Styles>
-  );
+  )
+  // return (
+  //   <div>
+  //     <a
+  //       href='javascript:void(0)'
+  //       onClick={clickApply}
+  //     >
+  //       Apply
+  //     </a>
+  //     <Styles
+  //       ref={rootElem}
+  //       height={height - 20}
+  //       width={width}
+  //     >
+  //       {/* <h3>{props.headerText}</h3>
+  //     <pre>${JSON.stringify(data, null, 2)}</pre> */}
+  //     </Styles>
+
+  //     <br />
+  //     <br />
+  //     <br />
+  //     <br />
+  //     <br />
+  //   </div>
+  // );
 }

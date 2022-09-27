@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { QueryFormData, supersetTheme, TimeseriesDataRecord } from '@superset-ui/core';
+import { Datasource, QueryFormData, supersetTheme, TimeseriesDataRecord } from '@superset-ui/core';
 
 export interface SupersetPluginChartHelloWorldStylesProps {
   height: number;
@@ -24,6 +24,7 @@ export interface SupersetPluginChartHelloWorldStylesProps {
 }
 
 interface SupersetPluginChartHelloWorldCustomizeProps {
+  onChange
 }
 
 export type SupersetPluginChartHelloWorldQueryFormData = QueryFormData &
@@ -32,6 +33,7 @@ export type SupersetPluginChartHelloWorldQueryFormData = QueryFormData &
 
 export type SupersetPluginChartHelloWorldProps = SupersetPluginChartHelloWorldStylesProps &
   SupersetPluginChartHelloWorldCustomizeProps & {
+    datasource?: Datasource;
     data: any;
     // add typing here for the props you pass in from transformProps.ts!
   };
