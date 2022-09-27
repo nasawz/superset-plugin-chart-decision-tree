@@ -35,7 +35,7 @@ import { SupersetPluginChartDecisionTree } from 'superset-plugin-chart-decision-
 
 to import the plugin and later add the following to the array that's passed to the `plugins` property:
 ```js
-new SupersetPluginChartDecisionTree().configure({ key: 'superset-plugin-chart-decision-tree' }),
+new SupersetPluginChartDecisionTree().configure({ key: 'chart-decision-tree' }),
 ```
 
 After that the plugin should show up when you run Superset, e.g. the development server:
